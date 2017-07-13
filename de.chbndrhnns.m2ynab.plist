@@ -9,6 +9,8 @@
         <string>/bin/bash</string>
         <key>StartInterval</key>
         <integer>21600</integer>
+        <key>RunAtLoad</key>
+        <true/>
         <key>ProgramArguments</key>
         <array>
             <string>~</string>
