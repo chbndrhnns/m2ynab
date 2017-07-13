@@ -6,17 +6,17 @@
         <key>Label</key>
         <string>de.chbndrhnns.m2ynab</string>
         <key>Program</key>
-        <string>/usr/bin/osascript</string>
+        <string>/bin/bash</string>
         <key>StartInterval</key>
-        <integer>1800</integer>
+        <integer>21600</integer>
         <key>ProgramArguments</key>
         <array>
             <string>~</string>
-            <string>/Users/jo/dev/m2ynab/moneymoney.scpt</string>
+            <string>/Users/jo/dev/m2ynab/bin/task.sh</string>
         </array>
         <key>StandardOutPath</key>
-        <string>/Users/jo/dev/m2ynab/logfile.log</string>
+        <string>/Users/jo/dev/m2ynab/log/task.stdout.log</string>
         <key>StandardErrorPath</key>
-        <string>/Users/jo/dev/m2ynab/another_logfile.log</string>
+        <string>/Users/jo/dev/m2ynab/log/task.stderr.log</string>
         </dict>
 </plist>
