@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>de.chbndrhnns.m2ynab</string>
+        <key>Program</key>
+        <string>/usr/bin/osascript</string>
+        <key>StartInterval</key>
+        <integer>1800</integer>
+        <key>ProgramArguments</key>
+        <array>
+            <string>~</string>
+            <string>/Users/jo/dev/m2ynab/moneymoney.scpt</string>
+        </array>
+        <key>StandardOutPath</key>
+        <string>/Users/jo/dev/m2ynab/logfile.log</string>
+        <key>StandardErrorPath</key>
+        <string>/Users/jo/dev/m2ynab/another_logfile.log</string>
+        </dict>
+</plist>
