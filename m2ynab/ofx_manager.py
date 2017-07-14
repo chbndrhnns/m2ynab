@@ -21,9 +21,9 @@ def create_rotating_log(path):
 
     logger.setLevel(logging.INFO)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(log_formatter)
-    logger.addHandler(console_handler)
+    # console_handler = logging.StreamHandler()
+    # console_handler.setFormatter(log_formatter)
+    # logger.addHandler(console_handler)
 
     # add a rotating handler
     file_handler = RotatingFileHandler(path, maxBytes=1000000,
@@ -33,8 +33,8 @@ def create_rotating_log(path):
     logger.addHandler(file_handler)
 
 
-def try_export():
-    plain = """
+def get_plain_script():
+    return """
 set appName to "MoneyMoney"
 set fromDate to (current date) - ({} * days)
 set accounts to {{"{}"}}
@@ -58,6 +58,11 @@ if application "MoneyMoney" is running then
 end if  
 return "app not running"
     """.format(Settings.days_to_export, '", "'.join(Settings.accounts.keys()))
+
+
+def try_export():
+    plain = get_plain_script()
+
     script = applescript.AppleScript(plain)
     logger.debug('Apple Script: \n\n{}\n\n'.format(plain))
     logger.info('Trying export from MoneyMoney...')
