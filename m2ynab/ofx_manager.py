@@ -7,7 +7,6 @@ from ofxtools.Parser import OFXTree
 
 sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
 import applescript
-
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -71,9 +70,8 @@ def main():
     logger.info('*' * 80)
 
     export_result = try_export()
-    if export_result == 'app not running':
-        logger.info('Exiting.')
-        sys.exit(1)
+    if 'app not running' in export_result or 'Locked database.' in export_result:
+        exit_with_code(2)
 
     source_path = os.path.dirname(export_result)
 
@@ -90,59 +88,81 @@ def main():
 
     # collect dates by unique_transactions
     for export in files:
-        parser = OFXTree()
-        parser.parse(export, codec='cp1252')
-        o = parser.convert()
+        try:
+            parser = OFXTree()
+            parser.parse(export, codec='cp1252')
+            o = parser.convert()
 
-        # find account type
-        if hasattr(o.statements[0], 'ccacctfrom'):
-            key = o.statements[0].ccacctfrom.acctid
-        elif hasattr(o.statements[0], 'account'):
-            key = o.statements[0].account.acctid
-        else:
-            logging.warn('Found strange account type: {}'.format(o.statements[0]))
+            # check if any statements exist
+            if len(o.statements) is 0:
+                continue
 
-        if key not in statements:
-            statements[key] = list()
+            # find account type
+            if hasattr(o.statements[0], 'ccacctfrom'):
+                key = o.statements[0].ccacctfrom.acctid
+            elif hasattr(o.statements[0], 'account'):
+                key = o.statements[0].account.acctid
+            else:
+                logging.warn('Found strange account type: {}'.format(o.statements[0]))
 
-        statements[key].append(o.statements[0])
-        objects[key] = o
-        parsers[key] = parser
+            if key not in statements:
+                statements[key] = list()
+
+            statements[key].append(o.statements[0])
+            objects[key] = o
+            parsers[key] = parser
+        except (KeyError, AttributeError, TypeError, IndexError) as exc:
+            logger.error('An error occured during parsing the exports: {}'.format(exc))
+            logger.error('Context: {}'.format(export))
+            exit_with_code(1)
 
     logger.info('-' * 80)
     for account in statements:
-        logger.info('Got {} statements for account {}'.format(len(statements[account]), account))
+        try:
+            logger.info('Got {} statements for account {}'.format(len(statements[account]), account))
 
-        # get all transactions
-        transactions = [transaction for transaction_list in statements[account] for transaction in
-                        transaction_list.banktranlist]
-        logger.info('Got {} transactions for account {}'.format(len(transactions), account))
+            # get all transactions
+            transactions = [transaction for transaction_list in statements[account] for transaction in
+                            transaction_list.banktranlist]
+            logger.info('Got {} transactions for account {}'.format(len(transactions), account))
 
-        # keep unique transactions only
-        unique = dict()
-        for t in transactions:
-            unique[t.__repr__()] = t
-        logger.info('Got {} unique transactions for account {}'.format(len(unique), account))
+            # keep unique transactions only
+            unique = dict()
+            for t in transactions:
+                unique[t.__repr__()] = t
+            logger.info('Got {} unique transactions for account {}'.format(len(unique), account))
 
-        objects[account].statements[0].banktranlist[:] = []
-        objects[account].statements[0].banktranlist.extend(unique.values())
+            objects[account].statements[0].banktranlist[:] = []
+            objects[account].statements[0].banktranlist.extend(unique.values())
+        except (KeyError, AttributeError, TypeError, IndexError) as exc:
+            logger.error('An error occured during parsing the statements: {}'.format(exc))
+            exit_with_code(1)
 
         logger.info('-' * 80)
 
     for account in parsers:
-        destination = '{}/{}.ofx'.format(Settings.destination_path, account)
-        logger.info('Writing {} transactions to {}'.format(len(unique), destination))
-        parsers[account].write(destination)
+        try:
+            destination = '{}/{}.ofx'.format(Settings.destination_path, account)
+            logger.info('Writing {} transactions to {}'.format(len(unique), destination))
+            parsers[account].write(destination)
+        except (KeyError, AttributeError, TypeError, IndexError) as exc:
+            logger.error('An error occured during writing the files: {}'.format(exc))
+            exit_with_code(1)
 
     logger.info('Deleting {} files from {}'.format(len(files), source_path))
     for export in files:
         os.remove(export)
 
+    exit_with_code(0)
+
+
+def exit_with_code(code):
     logger.info('*' * 80)
+    sys.exit(code)
 
 
 if __name__ == '__main__':
-    log_file = "ofx_manager.log"
+    log_file = "{}/log/ofx_manager.log".format(Settings.cwd)
     create_rotating_log(log_file)
 
     main()
