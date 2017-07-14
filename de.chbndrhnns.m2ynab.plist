@@ -7,10 +7,13 @@
         <string>de.chbndrhnns.m2ynab</string>
         <key>Program</key>
         <string>/bin/bash</string>
-        <key>StartInterval</key>
-        <integer>21600</integer>
         <key>RunAtLoad</key>
         <true/>
+        <key>KeepAlive</key>
+        <dict>
+	        <key>SuccessfulExit</key>
+	        <true/>
+        </dict>
         <key>ProgramArguments</key>
         <array>
             <string>~</string>
