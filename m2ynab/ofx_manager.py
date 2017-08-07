@@ -21,9 +21,10 @@ def create_rotating_log(path):
 
     logger.setLevel(logging.INFO)
 
-    # console_handler = logging.StreamHandler()
-    # console_handler.setFormatter(log_formatter)
-    # logger.addHandler(console_handler)
+    if Settings.print_to_console:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(log_formatter)
+        logger.addHandler(console_handler)
 
     # add a rotating handler
     file_handler = RotatingFileHandler(path, maxBytes=1000000,
@@ -95,7 +96,7 @@ def main():
     for export in files:
         try:
             parser = OFXTree()
-            parser.parse(export, codec='cp1252')
+            parser.parse(export)
             o = parser.convert()
 
             # check if any statements exist
@@ -117,7 +118,7 @@ def main():
             objects[key] = o
             parsers[key] = parser
         except (KeyError, AttributeError, TypeError, IndexError) as exc:
-            logger.error('An error occured during parsing the exports: {}'.format(exc))
+            logger.error('An error occurred during parsing the exports: {}'.format(exc))
             logger.error('Context: {}'.format(export))
             exit_with_code(1)
 
@@ -140,7 +141,7 @@ def main():
             objects[account].statements[0].banktranlist[:] = []
             objects[account].statements[0].banktranlist.extend(unique.values())
         except (KeyError, AttributeError, TypeError, IndexError) as exc:
-            logger.error('An error occured during parsing the statements: {}'.format(exc))
+            logger.error('An error occurred during parsing the statements: {}'.format(exc))
             exit_with_code(1)
 
         logger.info('-' * 80)
@@ -151,12 +152,13 @@ def main():
             logger.info('Writing {} transactions to {}'.format(len(unique), destination))
             parsers[account].write(destination)
         except (KeyError, AttributeError, TypeError, IndexError) as exc:
-            logger.error('An error occured during writing the files: {}'.format(exc))
+            logger.error('An error occurred during writing the files: {}'.format(exc))
             exit_with_code(1)
 
-    logger.info('Deleting {} files from {}'.format(len(files), source_path))
-    for export in files:
-        os.remove(export)
+    if Settings.delete_exports:
+        logger.info('Deleting {} files from {}'.format(len(files), source_path))
+        for export in files:
+            os.remove(export)
 
     exit_with_code(0)
 
