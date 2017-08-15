@@ -1,0 +1,16 @@
+import os
+
+
+class Settings:
+    def __init__(self):
+        pass
+
+    cwd = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+    delete_exports = False
+    print_to_console = False
+    destination_path = '{}/output'.format(cwd)
+    pattern = '*.ofx'
+    days_to_export = 31
+    accounts = {'account': {'id': 'ofx_account_no',
+                        'name': 'account'},
+                }

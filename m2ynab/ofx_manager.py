@@ -1,7 +1,10 @@
 import glob
+import json
 import os
 
 import sys
+
+import requests
 from settings import Settings
 from ofxtools.Parser import OFXTree
 
@@ -11,6 +14,13 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 logger = logging.getLogger("Rotating Log")
+
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        return super(DecimalEncoder, self).default(o)
 
 
 def create_rotating_log(path):
@@ -137,6 +147,21 @@ def main():
             for t in transactions:
                 unique[t.__repr__()] = t
             logger.info('Got {} unique transactions for account {}'.format(len(unique), account))
+            #
+            # logger.info('Sending transactions into the cloud'.format(len(unique)))
+            # try:
+            #     account_name = 'test'
+            #     for t in transactions:
+            #         data = {"transactions": [
+            #             {"account": account_name, "payee": t.name, "amount": t.trnamt, "memo": t.memo,
+            #              "created": t.dtposted}]}
+            #
+            #         # send to server
+            #         response = requests.post(url='http://localhost:5000/transactions', json=data)
+            #
+            #         logger.debug(response.text)
+            # except Exception as exc:
+            #     logger.error(exc)
 
             objects[account].statements[0].banktranlist[:] = []
             objects[account].statements[0].banktranlist.extend(unique.values())
@@ -149,7 +174,8 @@ def main():
     for account in parsers:
         try:
             destination = '{}/{}.ofx'.format(Settings.destination_path, account)
-            logger.info('Writing {} transactions to {}'.format(len(unique), destination))
+            logger.info(
+                'Writing {} transactions to {}'.format(len(objects[account].statements[0].banktranlist), destination))
             parsers[account].write(destination)
         except (KeyError, AttributeError, TypeError, IndexError) as exc:
             logger.error('An error occurred during writing the files: {}'.format(exc))
