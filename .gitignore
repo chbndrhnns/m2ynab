@@ -1,4 +1,3 @@
-
 output/
 log/
 settings.py
@@ -16,6 +15,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -90,6 +90,11 @@ celerybeat-schedule
 .env
 .venv
 env/
+# dotenv
+.env
+
+# virtualenv
+.venv
 venv/
 ENV/
 
