@@ -1,3 +1,3 @@
 pynYNAB
 flask
-ofxtools
+-e git://github.com/csingley/ofxtools.git@0766212646aa52424302114c064693108df4cfbe#egg=ofxtools

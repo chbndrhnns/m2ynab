@@ -25,7 +25,7 @@ echo -e "$(date) Got network event signal."
 osascript -e "display notification \"$theDate\" with title \"m2ynab\" subtitle \"Export requested. Waiting some time for new transactions...\""
 
 # wait for $timeout seconds that a connection happens
-timeout=15
+timeout=30
 while lsof -t -c MoneyMone -a -i :https
 do
     sleep 1
@@ -35,6 +35,7 @@ do
     (( timeout-- ))
 done
 
+sleep 15
 echo -e "Starting export..."
 python ${ROOT}/m2ynab/ofx_manager.py
 status=$?
